@@ -2,6 +2,22 @@ import numpy as np
 import networkx as nx
 from scipy.linalg import fractional_matrix_power
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+
+
+def create_train_test_data(F, y, num_test_samples):
+	N = F.shape[0]	#	number of nodes in the graph
+	indices = np.arange(N)
+	
+	X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(F, y, indices, test_size=num_test_samples, random_state=42)
+	
+	y_train_masked = np.zeros(y.shape)
+	y_train_masked[idx_train] = y_train
+
+	y_test_masked = np.zeros(y.shape)
+	y_test_masked[idx_test] = y_test
+
+	return F, y_train_masked, y_test_masked
 
 
 def create_graph_citeseer(graph_filename):
