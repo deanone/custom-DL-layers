@@ -5,19 +5,28 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 
+def create_zeros_ones_mask(mask, l):
+	zeros_ones_mask = np.zeros(l)
+	zeros_ones_mask[mask] = 1
+	return np.array(zeros_ones_mask, dtype=np.bool)
+
+
 def create_train_test_data(F, y, num_test_samples):
 	N = F.shape[0]	#	number of nodes in the graph
 	indices = np.arange(N)
 	
-	X_train, X_test, y_train, y_test, idx_train, idx_test = train_test_split(F, y, indices, test_size=num_test_samples, random_state=42)
+	X_train, X_test, y_train, y_test, train_mask, test_mask = train_test_split(F, y, indices, test_size=num_test_samples, random_state=42)
 	
 	y_train_masked = np.zeros(y.shape)
-	y_train_masked[idx_train] = y_train
+	y_train_masked[train_mask] = y_train
 
 	y_test_masked = np.zeros(y.shape)
-	y_test_masked[idx_test] = y_test
+	y_test_masked[test_mask] = y_test
 
-	return F, y_train_masked, y_test_masked
+	train_mask = create_zeros_ones_mask(train_mask, y.shape[0])
+	test_mask = create_zeros_ones_mask(test_mask, y.shape[0])
+
+	return F, y_train_masked, y_test_masked, train_mask, test_mask
 
 
 def create_graph_citeseer(graph_filename):

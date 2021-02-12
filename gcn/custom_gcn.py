@@ -27,7 +27,7 @@ class GCNLayer(keras.layers.Layer):
     def build(self, input_shape):
         self.theta = self.add_weight(
             shape = (input_shape[-1], self.C),
-            initializer = "random_normal",
+            initializer = tf.keras.initializers.GlorotNormal(),
             trainable = True,
         )
 
@@ -64,14 +64,31 @@ class GCN(keras.Model):
         num_units_in_hidden_layers,
         num_units_in_output_layer,
         A_norm,
+        labels,
+        mask,
         name='gcn',
         **kwargs
     ):
         super(GCN, self).__init__(name=name, **kwargs)
-        self.input_layer = GCNLayer(num_units_in_hidden_layers[0], A_norm, 'relu')
-        self.out = GCNLayer(num_units_in_output_layer, A_norm, 'softmax')
+        self.num_units_in_hidden_layers = num_units_in_hidden_layers
+        self.num_units_in_output_layer = num_units_in_output_layer
+        self.A_norm = A_norm
+        self.labels = labels
+        self.mask = mask
+        self.input_layer = GCNLayer(self.num_units_in_hidden_layers[0], self.A_norm, 'relu')
+        self.out = GCNLayer(self.num_units_in_output_layer, self.A_norm, 'softmax')
 
     def call(self, X):
         H = self.input_layer(X)
         Z = self.out(H)
+
+        # Softmax cross-entropy loss with masking
+        mask = self.mask
+        masked_loss = tf.nn.softmax_cross_entropy_with_logits(logits=Z, labels=self.labels)
+        mask = tf.cast(mask, dtype=tf.float32)
+        mask /= tf.reduce_mean(mask)
+        masked_loss *= mask
+        masked_loss = tf.reduce_mean(masked_loss)        
+
+        self.add_loss(masked_loss)
         return Z

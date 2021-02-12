@@ -18,13 +18,13 @@ def main():
 
 	# Split data
 	print('Splitting data into training and test subsets...')
-	F, y_train_masked, y_test_masked = create_train_test_data(F, y, 1000)
+	F, y_train_masked, y_test_masked, train_mask, test_mask = create_train_test_data(F, y, 1000)
 
 	# Set up, train and evaluate the custom DNN model
 	print('Setting up GCN...')
 	num_units_in_hidden_layers = [32]
 	num_units_in_output_layer = 6
-	gcn = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm)
+	gcn = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm, y_train_masked, train_mask)
 	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
 
 	print('Training GCN...')
