@@ -24,17 +24,17 @@ def main():
 	print('Setting up GCN...')
 	num_units_in_hidden_layers = [32]
 	num_units_in_output_layer = 6
-	gcn = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm, y_train_masked, train_mask)
-	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
+	gcn = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm, train_mask, test_mask)
+	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
 
 	print('Training GCN...')
 	gcn.fit(F, y_train_masked, epochs=100, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
 	
 	print('Evaluating GCN...')
-	evaluation_results_custom = gcn.evaluate(F, y_test_masked, batch_size=F.shape[0])
+	evaluation_results = gcn.evaluate(F, y_test_masked, batch_size=F.shape[0])
 	
-	print('Test Accuracy: ', round(evaluation_results_custom[1] * 100.0, 3))
-
+	print('Test Accuracy (%): ', round(evaluation_results[1] * 100.0, 3))
+	
 
 if __name__ == '__main__':
 	main()

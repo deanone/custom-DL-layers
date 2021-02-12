@@ -2,6 +2,10 @@ import tensorflow as tf
 from tensorflow import keras
 
 
+loss_tracker = keras.metrics.Mean(name='softmax cross-entropy with masking loss')
+metric_tracker = keras.metrics.Mean(name='accuracy with masking')
+
+
 class GCNLayer(keras.layers.Layer):
     """
 
@@ -64,8 +68,8 @@ class GCN(keras.Model):
         num_units_in_hidden_layers,
         num_units_in_output_layer,
         A_norm,
-        labels,
-        mask,
+        train_mask,
+        test_mask,
         name='gcn',
         **kwargs
     ):
@@ -73,22 +77,79 @@ class GCN(keras.Model):
         self.num_units_in_hidden_layers = num_units_in_hidden_layers
         self.num_units_in_output_layer = num_units_in_output_layer
         self.A_norm = A_norm
-        self.labels = labels
-        self.mask = mask
+        self.train_mask = train_mask
+        self.test_mask = test_mask
+
         self.input_layer = GCNLayer(self.num_units_in_hidden_layers[0], self.A_norm, 'relu')
         self.out = GCNLayer(self.num_units_in_output_layer, self.A_norm, 'softmax')
+
 
     def call(self, X):
         H = self.input_layer(X)
         Z = self.out(H)
+        return Z
+
+
+    def train_step(self, data):
+        x, y = data
+        mask = self.train_mask
+        with tf.GradientTape() as tape:
+            y_pred = self(x, training=True)
+
+            # Softmax cross-entropy loss with masking
+            masked_loss = tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y)
+            mask = tf.cast(mask, dtype=tf.float32)
+            mask /= tf.reduce_mean(mask)
+            masked_loss *= mask
+            #masked_loss = tf.reduce_mean(masked_loss)
+            loss = masked_loss
+
+            # Accuracy with masking
+            correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y, 1))
+            accuracy_all = tf.cast(correct_prediction, tf.float32)
+            accuracy_all *= mask
+            metric = accuracy_all
+
+        # Compute gradients
+        trainable_vars = self.trainable_variables
+        gradients = tape.gradient(loss, trainable_vars)
+
+        # Update weights
+        self.optimizer.apply_gradients(zip(gradients, trainable_vars))
+
+        # Compute our own metrics
+        loss_tracker.update_state(loss)
+        metric_tracker.update_state(metric)
+
+        return {'softmax cross-entropy with masking loss': loss_tracker.result(), 'accuracy with masking': metric_tracker.result()}
+
+
+    @property
+    def metrics(self):
+        return [loss_tracker, metric_tracker]
+
+
+    def test_step(self, data):
+        x, y = data
+
+        # Cumpote predictions
+        y_pred = self(x, training=False)
 
         # Softmax cross-entropy loss with masking
-        mask = self.mask
-        masked_loss = tf.nn.softmax_cross_entropy_with_logits(logits=Z, labels=self.labels)
+        mask = self.test_mask
+        masked_loss = tf.nn.softmax_cross_entropy_with_logits(logits=y_pred, labels=y)
         mask = tf.cast(mask, dtype=tf.float32)
         mask /= tf.reduce_mean(mask)
         masked_loss *= mask
-        masked_loss = tf.reduce_mean(masked_loss)        
+        loss = masked_loss
 
-        self.add_loss(masked_loss)
-        return Z
+        # Accuracy with masking
+        correct_prediction = tf.equal(tf.argmax(y_pred, 1), tf.argmax(y, 1))
+        accuracy_all = tf.cast(correct_prediction, tf.float32)
+        accuracy_all *= mask
+        metric = accuracy_all
+
+        loss_tracker.update_state(loss)
+        metric_tracker.update_state(metric)
+
+        return {'softmax cross-entropy with masking loss': loss_tracker.result(), 'accuracy with masking': metric_tracker.result()}
