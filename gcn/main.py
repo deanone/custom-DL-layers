@@ -28,13 +28,12 @@ def main():
 	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
 
 	print('Training GCN...')
-	gcn.fit(F, y_train_masked, epochs=5, batch_size=F.shape[0])
+	gcn.fit(F, y_train_masked, epochs=100, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
 	
-
-	evaluation_results_custom = gcn.evaluate(F, y_test_masked)
+	print('Evaluating GCN...')
+	evaluation_results_custom = gcn.evaluate(F, y_test_masked, batch_size=F.shape[0])
 	
-	print('Test MAE (custom DNN): ', evaluation_results_custom[1])
-
+	print('Test Accuracy: ', round(evaluation_results_custom[1] * 100.0, 3))
 
 
 if __name__ == '__main__':

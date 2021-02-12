@@ -30,7 +30,6 @@ class GCNLayer(keras.layers.Layer):
             initializer = "random_normal",
             trainable = True,
         )
-        self.b = self.add_weight(shape = (self.N,), initializer = "random_normal", trainable = True)
 
     def call(self, X):
         """
@@ -41,9 +40,15 @@ class GCNLayer(keras.layers.Layer):
         """
 
         if self.activation_type == 'relu':
-            return tf.nn.relu(tf.matmul(tf.matmul(self.A_norm, X), self.theta))
+            prod_0 = tf.matmul(self.A_norm, X)
+            prod_1 = tf.matmul(prod_0, self.theta)
+            res = tf.nn.relu(prod_1)
+            return res
         elif self.activation_type == 'softmax':
-            return tf.nn.softmax(tf.matmul(tf.matmul(self.A_norm, X), self.theta))
+            prod_0 = tf.matmul(self.A_norm, X)
+            prod_1 = tf.matmul(prod_0, self.theta)
+            res = tf.nn.softmax(prod_1)
+            return res
 
 
 class GCN(keras.Model):
@@ -63,10 +68,10 @@ class GCN(keras.Model):
         **kwargs
     ):
         super(GCN, self).__init__(name=name, **kwargs)
-        self.layer_1 = GCNLayer(num_units_in_hidden_layers[0], A_norm, 'relu')
-        self.layer_out = GCNLayer(num_units_in_output_layer, A_norm, 'softmax')
+        self.input_layer = GCNLayer(num_units_in_hidden_layers[0], A_norm, 'relu')
+        self.out = GCNLayer(num_units_in_output_layer, A_norm, 'softmax')
 
     def call(self, X):
-        H = self.layer_1(X)
-        Z = self.layer_out(H)
+        H = self.input_layer(X)
+        Z = self.out(H)
         return Z
