@@ -40,14 +40,10 @@ class GCNLayer(keras.layers.Layer):
 
         """
 
-        self.A_norm = self.A_norm.astype(X.dtype)
-        self.theta = self.theta.astype(X.dtype)
-        self.b = self.b.astype(X.dtype)
-
         if self.activation_type == 'relu':
-            return tf.nn.relu(tf.matmul(tf.matmul(self.A_norm, X), self.theta) + self.b)
+            return tf.nn.relu(tf.matmul(tf.matmul(self.A_norm, X), self.theta))
         elif self.activation_type == 'softmax':
-            return tf.nn.softmax(tf.matmul(tf.matmul(self.A_norm, X), self.theta) + self.b)
+            return tf.nn.softmax(tf.matmul(tf.matmul(self.A_norm, X), self.theta))
 
 
 class GCN(keras.Model):

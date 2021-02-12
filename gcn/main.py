@@ -28,11 +28,12 @@ def main():
 	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2), loss='categorical_crossentropy', metrics=['accuracy'])
 
 	print('Training GCN...')
-	gcn.fit(F, y_train_masked, epochs=5, batch_size=100)
+	gcn.fit(F, y_train_masked, epochs=5, batch_size=F.shape[0])
 	
 
-	#evaluation_results_custom = dnn_custom.evaluate(x_test, y_test)
-	#print('Test MAE (custom DNN): ', evaluation_results_custom[1])
+	evaluation_results_custom = gcn.evaluate(F, y_test_masked)
+	
+	print('Test MAE (custom DNN): ', evaluation_results_custom[1])
 
 
 

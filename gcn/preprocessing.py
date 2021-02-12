@@ -91,7 +91,9 @@ def create_feature_matrix_citeseer(features_filename, nodes):
 			labels_dict[node_id] = node_label
 
 	F = np.array(list(features_dict.values()))
+	F = F.astype('float32')
 	y = np.array(list(labels_dict.values()))
+	y = y.astype('float32')
 	return F, y
 
 
@@ -108,5 +110,6 @@ def create_A_norm(g):
 
 	# Normalized A matrix
 	A_norm = D_frac_pow.dot(A).dot(D_frac_pow)
+	A_norm = A_norm.astype('float32')
 
 	return A_norm
