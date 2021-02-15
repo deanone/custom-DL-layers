@@ -54,6 +54,34 @@ def create_graph_citeseer(graph_filename):
 	return g
 
 
+def create_graph_zackary(graph_filename):
+	f = open(graph_filename)
+	lines = f.readlines()
+	f.close()
+
+	nodes = []
+	edges = []
+	for i, line in enumerate(lines):
+		if (i == 0) or (i == 1):
+			continue
+		else:
+			line = line.strip('\n')
+			line = line.split(' ')
+			node_a = line[0]
+			node_b = line[1]
+			if node_a not in nodes:
+				nodes.append(node_a)
+			if node_b not in nodes:
+				nodes.append(node_b)
+			edge = (node_a, node_b)
+			if edge not in edges:
+				edges.append(edge)
+	g = nx.Graph()
+	g.add_nodes_from(nodes)
+	g.add_edges_from(edges)
+	return g
+
+
 def str_to_ndarray_label_citeseer(label_str, num_of_classes):
 	label_ndarray = np.zeros(num_of_classes)
 	if label_str == 'Agents':

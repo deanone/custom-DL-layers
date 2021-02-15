@@ -28,7 +28,7 @@ def main():
 	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
 
 	print('Training GCN...')
-	gcn.fit(F, y_train_masked, epochs=100, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
+	gcn.fit(F, y_train_masked, epochs=200, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
 	
 	print('Evaluating GCN...')
 	evaluation_results = gcn.evaluate(F, y_test_masked, batch_size=F.shape[0])

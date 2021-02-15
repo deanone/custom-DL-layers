@@ -43,16 +43,17 @@ class GCNLayer(keras.layers.Layer):
 
         """
 
+        prod_0 = tf.matmul(self.A_norm, X)
+        prod_1 = tf.matmul(prod_0, self.theta)
+
         if self.activation_type == 'relu':
-            prod_0 = tf.matmul(self.A_norm, X)
-            prod_1 = tf.matmul(prod_0, self.theta)
             res = tf.nn.relu(prod_1)
-            return res
         elif self.activation_type == 'softmax':
-            prod_0 = tf.matmul(self.A_norm, X)
-            prod_1 = tf.matmul(prod_0, self.theta)
             res = tf.nn.softmax(prod_1)
-            return res
+        elif self.activation_type == 'linear':
+            res = prod_1
+
+        return res
 
 
 class GCN(keras.Model):
@@ -80,12 +81,16 @@ class GCN(keras.Model):
         self.train_mask = train_mask
         self.test_mask = test_mask
 
-        self.input_layer = GCNLayer(self.num_units_in_hidden_layers[0], self.A_norm, 'relu')
+        self.hidden_layers = [] 
+        for i in range(len(num_units_in_hidden_layers)):
+            self.hidden_layers.append(GCNLayer(self.num_units_in_hidden_layers[i], self.A_norm, 'linear'))
         self.out = GCNLayer(self.num_units_in_output_layer, self.A_norm, 'softmax')
 
 
     def call(self, X):
-        H = self.input_layer(X)
+        H = X
+        for i in range(len(self.num_units_in_hidden_layers)):
+            H = self.hidden_layers[i](H)
         Z = self.out(H)
         return Z
 
