@@ -28,12 +28,14 @@ class GCNLayer(keras.layers.Layer):
         self.N = A_norm.shape[0]    #   number of nodes in the graph
         self.activation_type = activation_type
 
+
     def build(self, input_shape):
         self.theta = self.add_weight(
             shape = (input_shape[-1], self.C),
             initializer = tf.keras.initializers.GlorotNormal(),
             trainable = True,
         )
+
 
     def call(self, X):
         """

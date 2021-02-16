@@ -7,10 +7,10 @@ def main():
 
 	print('Creating graph...')
 	graph_filename = 'data/citeseer/citeseer.cites'
-	g = create_graph_citeseer(graph_filename)
+	g = graph_citeseer(graph_filename)
 
 	print('Creating normalized adjacency matrix...')
-	A_norm = create_A_norm(g)
+	A_norm = normalized_adjacency(g)
 
 	print('Loading nodes feature matrix...')
 	features_filename = 'data/citeseer/citeseer.content'
@@ -18,7 +18,7 @@ def main():
 
 	# Split data
 	print('Splitting data into training and test subsets...')
-	F, y_train_masked, train_mask, y_test_masked, test_mask = create_train_test_data(F, y, 1000)
+	F, y_train_masked, train_mask, y_test_masked, test_mask = split_train_test_data(F, y, 1000)
 
 	# Set up, train and evaluate the custom DNN model
 	print('Setting up GCN...')

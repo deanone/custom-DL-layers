@@ -5,15 +5,16 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 
-def create_graph_citeseer(graph_filename):
+def graph_citeseer(graph_filename):
 	"""
 
-	:param graph_filename: the name of the file in which the graph is stored
+	:param graph_filename: the name of the file in which the citeseer graph is stored
 	:type graph_filename: str
 	:return: the generated graph object
 	:rtype: networkx.classes.graph.Graph
 
 	"""
+
 	f = open(graph_filename)
 	lines = f.readlines()
 	f.close()
@@ -38,7 +39,7 @@ def create_graph_citeseer(graph_filename):
 	return g
 
 
-def create_graph_zackary(graph_filename):
+def graph_zackary(graph_filename):
 	"""
 	
 	:param graph_filename: the name of the file in which the graph is stored
@@ -93,7 +94,7 @@ def create_zeros_ones_mask(input_array, l):
 	return np.array(zeros_ones_mask, dtype=np.bool)
 
 
-def create_train_test_data(F, y, num_test_samples):
+def split_train_test_data(F, y, num_test_samples):
 	"""
 
 	It splits the data into train and test subsets along with their corresponding train and test masks.
@@ -133,7 +134,7 @@ def create_train_test_data(F, y, num_test_samples):
 
 
 def ohe_label_citeseer(label, n_class=6):
-	'''
+	"""
 
 	It one-hot-encodes a label of one data point of the citeseer dataset.
 	:param label: a label of one data point
@@ -143,7 +144,7 @@ def ohe_label_citeseer(label, n_class=6):
 	:return: the one-hot-encoded vector that corresponds to the input label
 	:rtype: numpy.ndarray
 
-	'''
+	"""
 
 	label_ohe = np.zeros(n_class)
 	if label == 'Agents':
@@ -161,7 +162,43 @@ def ohe_label_citeseer(label, n_class=6):
 	return label_ohe
 
 
+def ohe_label_zackary(labels, n_class=2):
+	"""
+
+	It one-hot-encodes the labels of the zackary dataset.
+	:param labels: the labels
+	:type labels: numpy.ndarray
+	:param n_class: the number of classes in the zackary dataset
+	:type n_class: int
+	:return: the one-hot-encoded vectors that correspond to the input labels
+	:rtype: numpy.ndarray
+
+	"""
+
+	labels_ohe = np.zeros((len(labels), 2))
+	for i in range(len(labels)):
+		if labels[i] == 0:
+			labels_ohe[i] = np.array([1, 0])
+		else:
+			labels_ohe[i] = np.array([0, 1])
+	return labels_ohe
+
+
 def create_feature_matrix_citeseer(features_filename, nodes):
+	"""
+
+	It creates the nodes features matrix and the corresponding vector of labels.
+	:param features_filename: the name of the file in which the citeseer nodes features matrix is stored
+	:type features_filename: str
+	:param nodes: a list of the nodes (i.e. integer indexes) of the citeseer graph.
+	:type : list
+	:return: the data samples
+	:rtype: numpy.ndarray
+	:return: the data labels
+	:rtype: numpy.ndarray
+
+	"""
+
 	num_of_words = 3703
 	n_class = 6
 
@@ -196,7 +233,19 @@ def create_feature_matrix_citeseer(features_filename, nodes):
 	return F, y
 
 
-def create_A_norm(g):
+def normalized_adjacency(g):
+	"""
+
+	It creates the normalized adjacency matrix A based on the proposal of Kipf et al.
+	Thomas N. Kipf, Max Welling: Semi-Supervised Classification with Graph Convolutional Networks. ICLR (Poster) 2017
+
+	:param g: the graph
+	:type g: networkx.classes.graph.Graph	
+	:return: the normalized adjacency matrix
+	:rtype: numpy.ndarray
+
+	"""
+
 	# Adjacency matrix
 	A = nx.adjacency_matrix(g)
 	A = A.toarray()
@@ -207,7 +256,7 @@ def create_A_norm(g):
 	# Normalized degree matrix 
 	D_frac_pow = fractional_matrix_power(D, -0.5)
 
-	# Normalized A matrix
+	# Normalized adjacency matrix
 	A_norm = D_frac_pow.dot(A).dot(D_frac_pow)
 	A_norm = A_norm.astype('float32')
 

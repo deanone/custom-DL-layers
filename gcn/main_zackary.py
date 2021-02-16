@@ -3,33 +3,23 @@ from preprocessing import *
 from custom_gcn import GCN
 
 
-def ohe_y(y):
-	y_ohe = np.zeros((len(y), 2))
-	for i in range(len(y)):
-		if y[i] == 0:
-			y_ohe[i] = np.array([1, 0])
-		else:
-			y_ohe[i] = np.array([0, 1])
-	return y_ohe
-
-
 def main():
 	print('Creating graph...')
 	graph_filename = 'data/zachary/zachary'
-	g = create_graph_zackary(graph_filename)
+	g = graph_zackary(graph_filename)
 	N = g.number_of_nodes()
 
 	print('Creating normalized adjacency matrix...')
-	A_norm = create_A_norm(g)
+	A_norm = normalized_adjacency(g)
 
 	# Nodes feature matrix
 	F = np.eye(N)
 
 	# Real labels - found from original Zachary's paper
-	y = ohe_y(np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
+	y = ohe_label_zackary(np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
 
 	# Split data
-	F, y_train_masked, train_mask, y_test_masked, test_mask = create_train_test_data(F, y, 0.2)
+	F, y_train_masked, train_mask, y_test_masked, test_mask = split_train_test_data(F, y, 0.2)
 
 	# Set up, train and evaluate the custom DNN model
 	print('Setting up GCN...')
