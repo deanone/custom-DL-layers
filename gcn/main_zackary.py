@@ -29,7 +29,7 @@ def main():
 	y = ohe_y(np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]))
 
 	# Split data
-	F, y_train_masked, y_test_masked, train_mask, test_mask = create_train_test_data(F, y, 0.2)
+	F, y_train_masked, train_mask, y_test_masked, test_mask = create_train_test_data(F, y, 0.2)
 
 	# Set up, train and evaluate the custom DNN model
 	print('Setting up GCN...')

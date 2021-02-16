@@ -18,7 +18,7 @@ def main():
 
 	# Split data
 	print('Splitting data into training and test subsets...')
-	F, y_train_masked, y_test_masked, train_mask, test_mask = create_train_test_data(F, y, 1000)
+	F, y_train_masked, train_mask, y_test_masked, test_mask = create_train_test_data(F, y, 1000)
 
 	# Set up, train and evaluate the custom DNN model
 	print('Setting up GCN...')

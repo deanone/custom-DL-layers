@@ -5,37 +5,21 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 
-def create_zeros_ones_mask(mask, l):
-	zeros_ones_mask = np.zeros(l)
-	zeros_ones_mask[mask] = 1
-	return np.array(zeros_ones_mask, dtype=np.bool)
-
-
-def create_train_test_data(F, y, num_test_samples):
-	N = F.shape[0]	#	number of nodes in the graph
-	indices = np.arange(N)
-	
-	X_train, X_test, y_train, y_test, train_mask, test_mask = train_test_split(F, y, indices, test_size=num_test_samples, random_state=42)
-	
-	y_train_masked = np.zeros(y.shape)
-	y_train_masked[train_mask] = y_train
-
-	y_test_masked = np.zeros(y.shape)
-	y_test_masked[test_mask] = y_test
-
-	train_mask = create_zeros_ones_mask(train_mask, y.shape[0])
-	test_mask = create_zeros_ones_mask(test_mask, y.shape[0])
-
-	return F, y_train_masked, y_test_masked, train_mask, test_mask
-
-
 def create_graph_citeseer(graph_filename):
+	"""
+
+	:param graph_filename: the name of the file in which the graph is stored
+	:type graph_filename: str
+	:return: the generated graph object
+	:rtype: networkx.classes.graph.Graph
+
+	"""
 	f = open(graph_filename)
 	lines = f.readlines()
 	f.close()
 
-	nodes = []
-	edges = []
+	nodes = []	#	list of integer indexes
+	edges = []	#	list of tuples of integer indexes
 	for line in lines:
 		line = line.strip('\n')
 		line = line.split('\t')
@@ -55,12 +39,21 @@ def create_graph_citeseer(graph_filename):
 
 
 def create_graph_zackary(graph_filename):
+	"""
+	
+	:param graph_filename: the name of the file in which the graph is stored
+	:type graph_filename: str
+	:return: the generated graph object
+	:rtype: networkx.classes.graph.Graph
+
+	"""
+
 	f = open(graph_filename)
 	lines = f.readlines()
 	f.close()
 
-	nodes = []
-	edges = []
+	nodes = []	#	list of integer indexes
+	edges = []	#	list of tuples of integer indexes
 	for i, line in enumerate(lines):
 		if (i == 0) or (i == 1):
 			continue
@@ -82,26 +75,95 @@ def create_graph_zackary(graph_filename):
 	return g
 
 
-def str_to_ndarray_label_citeseer(label_str, num_of_classes):
-	label_ndarray = np.zeros(num_of_classes)
-	if label_str == 'Agents':
-		label_ndarray[0] = 1
-	elif label_str == 'AI':
-		label_ndarray[1] = 1
-	elif label_str == 'DB':
-		label_ndarray[2] = 1
-	elif label_str == 'IR':
-		label_ndarray[3] = 1
-	elif label_str == 'ML':
-		label_ndarray[4] = 1
-	elif label_str == 'HCI':
-		label_ndarray[5] = 1
-	return label_ndarray
+def create_zeros_ones_mask(input_array, l):
+	"""
+
+	It creates a mask of length l, which has 1s in the indexes of the input array and 0s elsewere.
+	:param input_array: the input array from which the mask is generated
+	:type input_array: numpy.ndarray
+	:param l: the required length of the generated mask
+	:type l: int 
+	:return: the generated mask of length l
+	:rtype: numpy.ndarray
+
+	"""
+
+	zeros_ones_mask = np.zeros(l)
+	zeros_ones_mask[input_array] = 1
+	return np.array(zeros_ones_mask, dtype=np.bool)
+
+
+def create_train_test_data(F, y, num_test_samples):
+	"""
+
+	It splits the data into train and test subsets along with their corresponding train and test masks.
+	:param F: the data samples
+	:type F: numpy.ndarray
+	:param y: the data labels
+	:type y: numpy.ndarray
+	:param num_test_samples: the absolute number or percentage of samples to be considered for testing
+	:return: the data samples
+	:rtype: numpy.ndarray
+	:return: the training labels
+	:rtype: numpy.ndarray
+	:return: the training mask
+	:rtype: numpy.ndarray
+	:return: the test labels
+	:rtype: numpy.ndarray
+	:return: the test mask
+	:rtype: numpy.ndarray
+
+	"""
+
+	N = F.shape[0]	#	number of nodes in the graph
+	indices = np.arange(N)
+	
+	X_train, X_test, y_train, y_test, train_mask, test_mask = train_test_split(F, y, indices, test_size=num_test_samples, random_state=42)
+	
+	y_train_masked = np.zeros(y.shape)
+	y_train_masked[train_mask] = y_train
+
+	y_test_masked = np.zeros(y.shape)
+	y_test_masked[test_mask] = y_test
+
+	train_mask = create_zeros_ones_mask(train_mask, y.shape[0])
+	test_mask = create_zeros_ones_mask(test_mask, y.shape[0])
+
+	return F, y_train_masked, train_mask, y_test_masked, test_mask
+
+
+def ohe_label_citeseer(label, n_class=6):
+	'''
+
+	It one-hot-encodes a label of one data point of the citeseer dataset.
+	:param label: a label of one data point
+	:type labels: numpy.ndarray
+	:param n_class: the number of classes in the citeseer dataset
+	:type n_class: int
+	:return: the one-hot-encoded vector that corresponds to the input label
+	:rtype: numpy.ndarray
+
+	'''
+
+	label_ohe = np.zeros(n_class)
+	if label == 'Agents':
+		label_ohe[0] = 1
+	elif label == 'AI':
+		label_ohe[1] = 1
+	elif label == 'DB':
+		label_ohe[2] = 1
+	elif label == 'IR':
+		label_ohe[3] = 1
+	elif label == 'ML':
+		label_ohe[4] = 1
+	elif label == 'HCI':
+		label_ohe[5] = 1
+	return label_ohe
 
 
 def create_feature_matrix_citeseer(features_filename, nodes):
 	num_of_words = 3703
-	num_of_classes = 6
+	n_class = 6
 
 	f = open(features_filename)
 	lines = f.readlines()
@@ -113,13 +175,13 @@ def create_feature_matrix_citeseer(features_filename, nodes):
 
 	labels_dict = {}
 	for node in nodes:
-		labels_dict[node] = np.zeros(num_of_classes)
+		labels_dict[node] = np.zeros(n_class)
 
 	for line in lines:
 		line = line.strip('\n')
 		line = line.split('\t')
 		node_id = line[0]
-		node_label = str_to_ndarray_label_citeseer(line[-1], num_of_classes)
+		node_label = ohe_label_citeseer(line[-1], n_class)
 		line = line[1:]
 		line = line[:-1]
 		line = [int(x) for x in line]
