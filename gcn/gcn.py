@@ -9,12 +9,15 @@ metric_tracker = keras.metrics.Mean(name='accuracy with masking')
 class GCNLayer(keras.layers.Layer):
     """
 
-    The class implements the Graph Convolutional Layer proposed by Kipf and Welling.
+    The class that implements the Graph Convolutional Layer proposed by Kipf and Welling.
+    Thomas N. Kipf, Max Welling: Semi-Supervised Classification with Graph Convolutional Networks. ICLR (Poster) 2017
     This class subclasses the keras.layers.Layer base class.
 
     """
+
     def __init__(self, C, A_norm, activation_type):
         """
+
         Constructor.
         :param C: the number of channels/filter of the layer
         :type C: int
@@ -22,6 +25,7 @@ class GCNLayer(keras.layers.Layer):
         :type A_norm: numpy.ndarray
 
         """
+
         super(GCNLayer, self).__init__()
         self.C = C
         self.A_norm = A_norm
@@ -30,6 +34,14 @@ class GCNLayer(keras.layers.Layer):
 
 
     def build(self, input_shape):
+        """
+        
+        It builds the layer by passing the shape of the input tensor to its weights tensor.
+        :param input_shape: the shape of the input tensor
+        :type input_shape: tuple
+
+        """
+        
         self.theta = self.add_weight(
             shape = (input_shape[-1], self.C),
             initializer = tf.keras.initializers.GlorotNormal(),
@@ -39,7 +51,8 @@ class GCNLayer(keras.layers.Layer):
 
     def call(self, X):
         """
-        The call function that implements the propagation rule (i.e. forward pass rule) of the GCN.
+
+        The call function that implements the propagation rule (i.e. forward pass rule) of the GCN layer.
         :param X: the input node features matrix
         :type X: numpy.ndarray
 
@@ -61,7 +74,7 @@ class GCNLayer(keras.layers.Layer):
 class GCN(keras.Model):
     """
 
-    The class implements a Graph Convolutional Network composed by GCN layers.
+    The class that implements a Graph Convolutional Network model composed by GCN layers.
     This class subclasses the keras.Model base class.
 
     """
@@ -76,6 +89,24 @@ class GCN(keras.Model):
         name='gcn',
         **kwargs
     ):
+         """
+
+        Constructor.
+        :param num_units_in_hidden_layers: a list of integers corrsponding to the number of filters in each GCN layer
+        :type num_units_in_hidden_layers: list
+        :param num_units_in_output_layer: the number of filters in the output GCN layer
+        :type num_units_in_output_layer: int
+        :param A_norm: the normalized adjacency matrix of the graph
+        :type A_norm: numpy.ndarray
+        :param train_mask: the training mask of the data
+        :type train_mask: numpy.ndarray
+        :param test_mask: the test mask of the data
+        :type test_mask: numpy.ndarray
+        :param name: the name of the model
+        :type name: str
+
+        """
+
         super(GCN, self).__init__(name=name, **kwargs)
         self.num_units_in_hidden_layers = num_units_in_hidden_layers
         self.num_units_in_output_layer = num_units_in_output_layer
@@ -90,6 +121,14 @@ class GCN(keras.Model):
 
 
     def call(self, X):
+        """
+
+        The call function that implements the propagation rule (i.e. forward pass rule) of the GCN model.
+        :param X: the input node features matrix
+        :type X: numpy.ndarray
+
+        """
+
         H = X
         for i in range(len(self.num_units_in_hidden_layers)):
             H = self.hidden_layers[i](H)
@@ -98,6 +137,15 @@ class GCN(keras.Model):
 
 
     def train_step(self, data):
+        """
+
+        The overridden version of the train_step(self, data) method called by the fit() method.
+        Custom training loop implemented from scratch.
+        :param data: the data passed as arguments to the fit() method
+        :type data: tuple
+
+        """
+
         x, y = data
         mask = self.train_mask
         with tf.GradientTape() as tape:
@@ -137,6 +185,14 @@ class GCN(keras.Model):
 
 
     def test_step(self, data):
+        """
+
+        The overridden version of the test_step(self, data) method called by the evaluate() method.
+        :param data: the data passed as arguments to the evaluate() method
+        :type data: tuple
+
+        """
+
         x, y = data
 
         # Cumpote predictions

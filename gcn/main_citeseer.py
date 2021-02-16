@@ -1,6 +1,6 @@
 import tensorflow as tf
 from preprocessing import *
-from custom_gcn import GCN
+from gcn import GCN
 
 
 def main():
@@ -24,14 +24,14 @@ def main():
 	print('Setting up GCN...')
 	num_units_in_hidden_layers = [32]
 	num_units_in_output_layer = 6
-	gcn = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm, train_mask, test_mask)
-	gcn.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
+	gcn_model = GCN(num_units_in_hidden_layers, num_units_in_output_layer, A_norm, train_mask, test_mask)
+	gcn_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
 
 	print('Training GCN...')
-	gcn.fit(F, y_train_masked, epochs=200, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
+	gcn_model.fit(F, y_train_masked, epochs=200, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
 	
 	print('Evaluating GCN...')
-	evaluation_results = gcn.evaluate(F, y_test_masked, batch_size=F.shape[0])
+	evaluation_results = gcn_model.evaluate(F, y_test_masked, batch_size=F.shape[0])
 	
 	print('Test Accuracy (%): ', round(evaluation_results[1] * 100.0, 3))
 	
