@@ -4,6 +4,8 @@ from gcn import GCN
 
 
 def main():
+	tf.random.set_seed(42)
+
 	print('Creating graph...')
 	graph_filename = 'data/zachary/zachary'
 	g = graph_zackary(graph_filename)
@@ -29,12 +31,14 @@ def main():
 	gcn_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-2))
 
 	print('Training GCN...')
-	gcn_model.fit(F, y_train_masked, epochs=200, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
+	gcn_model.fit(F, y_train_masked, epochs=10, batch_size=F.shape[0])	#	we take into account the whole dataset (i.e. node features) in each iteration - i.e. Batch Gradient Descent	
 	
 	print('Evaluating GCN...')
-	evaluation_results = gcn_model.evaluate(F, y_test_masked, batch_size=F.shape[0])
-	
-	print('Test Accuracy (%): ', round(evaluation_results[1] * 100.0, 3))
+	evaluation_results_train = gcn_model.evaluate(F, y_train_masked, batch_size=F.shape[0])
+	evaluation_results_test = gcn_model.evaluate(F, y_test_masked, batch_size=F.shape[0])
+
+	print('Train Accuracy (%): ', round(evaluation_results_train[1] * 100.0, 3))
+	print('Test Accuracy (%): ', round(evaluation_results_test[1] * 100.0, 3))
 
 
 if __name__ == '__main__':
